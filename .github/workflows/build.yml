@@ -94,22 +94,10 @@ jobs:
           for file in src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/*.dmg; do
             mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/Timelens-Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.dmg"
           done
-          for file in src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz; do
-            mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Timelens-Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.app.tar.gz"
-          done
-          for file in src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz.sig; do
-            mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Timelens-Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.app.tar.gz.sig"
-          done
       - uses: actions/upload-artifact@v4
         with:
           name: build-macos-dmg-${{ matrix.arch }}
           path: src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/*.dmg
-      - uses: actions/upload-artifact@v4
-        with:
-          name: updater-files-macos-${{ matrix.arch }}
-          path: |
-            src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz
-            src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz.sig
 
   build-windows:
     needs: prepare
@@ -134,10 +122,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Rename Windows Artifacts
+        shell: pwsh
         run: |
-          for file in src-tauri/target/release/bundle/msi/*.msi; do
-            mv "$file" "src-tauri/target/release/bundle/msi/Timelens-Client-${{ needs.prepare.outputs.version }}.msi"
-          done
+          Get-ChildItem src-tauri/target/release/bundle/msi/*.msi | ForEach-Object {
+            Move-Item $_ "src-tauri/target/release/bundle/msi/Timelens-Client-${{ needs.prepare.outputs.version }}.msi"
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: build-windows-msi
