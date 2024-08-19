@@ -8,7 +8,7 @@ use directories::UserDirs;
 use futures_util::{SinkExt, StreamExt};
 use http::{header, Request};
 use rand::Rng;
-use std::fs::{self, File};
+use std::fs::{self, File, OpenOptions};
 use std::io::Write;
 #[cfg(not(target_os = "macos"))]
 use std::path::Path;
@@ -16,6 +16,7 @@ use std::time::Duration;
 #[cfg(not(target_os = "macos"))]
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System};
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
+use std::path::PathBuf;
 
 #[cfg(target_os = "macos")]
 use applications::{AppInfoContext, AppInfo};
@@ -74,10 +75,39 @@ fn get_active_window_info() -> Option<String> {
     }
 }
 
+fn get_log_file_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let user_dirs = UserDirs::new().ok_or("Failed to get user directories")?;
+    let mut path = user_dirs.document_dir().ok_or("Failed to get document directory")?.to_path_buf();
+    path.push("timelens");
+    path.push("timelens.log");
+    Ok(path)
+}
+
+fn write_to_log_file(message: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let log_file = get_log_file_path()?;
+    let timelens_dir = log_file.parent().ok_or("Invalid log file path")?;
+
+    fs::create_dir_all(timelens_dir)?;
+
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log_file)?;
+
+    let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+    let log_entry = format!("[{}] {}\n", timestamp, message);
+
+    file.write_all(log_entry.as_bytes())?;
+    Ok(())
+}
 
 fn log(message: &str) {
     let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
-    println!("[{}] {}", timestamp, message);
+    let log_message = format!("[{}] {}", timestamp, message);
+    println!("{}", log_message);
+    if let Err(e) = write_to_log_file(&log_message) {
+        eprintln!("Failed to write to log file: {}", e);
+    }
 }
 
 fn get_or_set_api_key() -> String {
