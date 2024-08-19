@@ -22,8 +22,6 @@ jobs:
   build-macos:
     needs: prepare
     runs-on: macos-latest
-    env:
-      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - name: Redact Sensitive Information
@@ -93,8 +91,6 @@ jobs:
   build-windows:
     needs: prepare
     runs-on: windows-latest
-    env:
-      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -125,8 +121,6 @@ jobs:
   build-ubuntu:
     needs: prepare
     runs-on: ubuntu-latest
-    env:
-      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
