@@ -21,6 +21,13 @@ jobs:
 
   build-macos:
     needs: prepare
+    strategy:
+      matrix:
+        include:
+          - args: "--target aarch64-apple-darwin"
+            arch: "silicon"
+          - args: "--target x86_64-apple-darwin"
+            arch: "intel"
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
@@ -68,34 +75,35 @@ jobs:
           echo "Certificate imported."
       - name: Build Tauri App
         run: |
-          pnpm tauri build --target universal-apple-darwin --verbose
+          pnpm tauri build ${{ matrix.args }} --verbose
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ env.CERT_ID }}
         timeout-minutes: 30
-      - name: Sign App
+      - name: Debug Build Output
+        if: failure()
         run: |
-          codesign --force --options runtime --sign "$CERT_ID" --entitlements src-tauri/entitlements.plist src-tauri/target/universal-apple-darwin/release/bundle/macos/Timelens\ Client.app
-        env:
-          CERT_ID: ${{ env.CERT_ID }}
-        timeout-minutes: 10
-      - name: Create DMG
+          echo "Listing build directory contents:"
+          ls -R src-tauri/target
+          echo "Checking codesign output:"
+          codesign -dv --verbose=4 src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Vleer.app
+      - name: Rename and Publish macOS Artifacts
         run: |
-          create-dmg \
-            --volname "Timelens Client" \
-            --volicon "src-tauri/icons/icon.icns" \
-            --window-pos 200 120 \
-            --window-size 600 300 \
-            --icon-size 100 \
-            --icon "Timelens Client.app" 175 120 \
-            --hide-extension "Timelens Client.app" \
-            --app-drop-link 425 120 \
-            "Timelens-Client-${{ needs.prepare.outputs.version }}_universal.dmg" \
-            "src-tauri/target/universal-apple-darwin/release/bundle/macos/Timelens Client.app"
-        timeout-minutes: 10
+          mv src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/*.dmg src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/Vleer-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.dmg
+          mv src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Vleer-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.app.tar.gz
+          mv src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz.sig src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Vleer-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.app.tar.gz.sig
       - uses: actions/upload-artifact@v4
         with:
-          name: build-macos-dmg-universal
-          path: Timelens-Client-${{ needs.prepare.outputs.version }}_universal.dmg
+          name: build-macos-dmg-${{ matrix.arch }}
+          path: src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/*.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: updater-files-macos-${{ matrix.arch }}
+          path: |
+            src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz
+            src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz.sig
 
   build-windows:
     needs: prepare
