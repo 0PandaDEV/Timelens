@@ -10,7 +10,12 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let _tray = TrayIconBuilder::new()
         .menu(
             &MenuBuilder::new(app)
-                .items(&[&MenuItemBuilder::with_id("quit", "Quit").build(app)?])
+                .items(&[
+                    &MenuItemBuilder::with_id("app_name", "Timelens Client")
+                        .enabled(false)
+                        .build(app)?,
+                    &MenuItemBuilder::with_id("quit", "Quit").build(app)?
+                ])
                 .build()?,
         )
         .on_menu_event(move |_app, event| match event.id().as_ref() {
