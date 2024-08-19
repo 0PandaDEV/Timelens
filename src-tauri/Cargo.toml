@@ -1,7 +1,7 @@
 [package]
 name = "timelens-client"
 version = "0.1.0"
-description = "Timelens Client"
+description = "Timelens-Client"
 authors = ["pandadev"]
 edition = "2021"
 

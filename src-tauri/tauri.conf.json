@@ -1,5 +1,5 @@
 {
-  "productName": "Timelens Client",
+  "productName": "Timelens-Client",
   "version": "0.1.0",
   "identifier": "net.pandadev.timelens-client",
   "build": {

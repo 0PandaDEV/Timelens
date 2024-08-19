@@ -88,17 +88,17 @@ jobs:
           echo "Listing build directory contents:"
           ls -R src-tauri/target
           echo "Checking codesign output:"
-          codesign -dv --verbose=4 src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Timelens Client.app
+          codesign -dv --verbose=4 src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Timelens-Client.app
       - name: Rename and Publish macOS Artifacts
         run: |
           for file in src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/*.dmg; do
-            mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/Timelens Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.dmg"
+            mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/dmg/Timelens-Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.dmg"
           done
           for file in src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz; do
-            mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Timelens Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.app.tar.gz"
+            mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Timelens-Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.app.tar.gz"
           done
           for file in src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/*.app.tar.gz.sig; do
-            mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Timelens Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.app.tar.gz.sig"
+            mv "$file" "src-tauri/target/${{ matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin' }}/release/bundle/macos/Timelens-Client-${{ needs.prepare.outputs.version }}_${{ matrix.arch }}.app.tar.gz.sig"
           done
       - uses: actions/upload-artifact@v4
         with:
@@ -136,7 +136,7 @@ jobs:
       - name: Rename Windows Artifacts
         run: |
           for file in src-tauri/target/release/bundle/msi/*.msi; do
-            mv "$file" "src-tauri/target/release/bundle/msi/Timelens Client-${{ needs.prepare.outputs.version }}.msi"
+            mv "$file" "src-tauri/target/release/bundle/msi/Timelens-Client-${{ needs.prepare.outputs.version }}.msi"
           done
       - uses: actions/upload-artifact@v4
         with:
@@ -173,13 +173,13 @@ jobs:
       - name: Rename Ubuntu Artifacts
         run: |
           for file in src-tauri/target/release/bundle/deb/*.deb; do
-            mv "$file" "src-tauri/target/release/bundle/deb/Timelens Client-${{ needs.prepare.outputs.version }}.deb"
+            mv "$file" "src-tauri/target/release/bundle/deb/Timelens-Client-${{ needs.prepare.outputs.version }}.deb"
           done
           for file in src-tauri/target/release/bundle/appimage/*.AppImage; do
-            mv "$file" "src-tauri/target/release/bundle/appimage/Timelens Client-${{ needs.prepare.outputs.version }}.AppImage"
+            mv "$file" "src-tauri/target/release/bundle/appimage/Timelens-Client-${{ needs.prepare.outputs.version }}.AppImage"
           done
           for file in src-tauri/target/release/bundle/rpm/*.rpm; do
-            mv "$file" "src-tauri/target/release/bundle/rpm/Timelens Client-${{ needs.prepare.outputs.version }}.rpm"
+            mv "$file" "src-tauri/target/release/bundle/rpm/Timelens-Client-${{ needs.prepare.outputs.version }}.rpm"
           done
       - uses: actions/upload-artifact@v4
         with:
