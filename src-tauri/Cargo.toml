@@ -26,7 +26,6 @@ rand = "0.8.5"
 base64 = "0.22.1"
 active-win-pos-rs = "0.8.3"
 chrono = "0.4.33"
-crossbeam-channel = "0.5.13"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 applications = "0.2.3"

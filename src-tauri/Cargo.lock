@@ -4377,7 +4377,6 @@ dependencies = [
  "applications",
  "base64 0.22.1",
  "chrono",
- "crossbeam-channel",
  "dialoguer",
  "directories",
  "futures-util",

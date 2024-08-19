@@ -2,7 +2,6 @@
 use active_win_pos_rs::get_active_window;
 use base64::{engine::general_purpose, Engine as _};
 use chrono::Local;
-use crossbeam_channel::unbounded;
 use dialoguer::Input;
 use directories::UserDirs;
 use futures_util::{SinkExt, StreamExt};
@@ -42,14 +41,12 @@ fn get_active_window_info() -> Option<String> {
                     let cmd = process.cmd();
                     if !cmd.is_empty() {
                         if cmd[0].to_str().map_or(false, |s| s.contains("java")) {
-                            // Check for Minecraft-specific arguments
                             if cmd
                                 .iter()
                                 .any(|arg| arg.to_str().map_or(false, |s| s.contains("minecraft")))
                             {
                                 "Minecraft".to_string()
                             } else {
-                                // Try to get the JAR file name
                                 cmd.iter()
                                     .position(|arg| arg == "-jar")
                                     .and_then(|pos| cmd.get(pos + 1))
@@ -148,84 +145,73 @@ async fn run_internal() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = get_or_set_api_key();
     let url = url::Url::parse("wss://timelens.wireway.ch/v2/event")?;
 
-    let (tx, mut rx) = tokio::sync::mpsc::channel(100);
-    let (_event_sender, event_receiver) = unbounded::<()>();
-
-    tokio::spawn(async move {
-        while event_receiver.recv().is_ok() {
-            tx.send(()).await.ok();
+    loop {
+        match connect_and_run(&api_key, &url).await {
+            Ok(_) => {
+                log("WebSocket connection closed normally. Reconnecting...");
+            }
+            Err(e) => {
+                log(&format!("Error in WebSocket connection: {:?}. Reconnecting...", e));
+            }
         }
-    });
 
-    tokio::select! {
-        _ = rx.recv() => {
-            println!("Quitting application");
-            return Ok(());
-        }
-        _ = async {
-            let mut rng = rand::thread_rng();
-            let key: [u8; 16] = rng.gen();
-            let key = general_purpose::STANDARD.encode(&key);
+        tokio::time::sleep(Duration::from_secs(5)).await;
+    }
+}
 
-            let request = Request::builder()
-                .uri(url.as_str())
-                .header("Host", url.host_str().unwrap_or("timelens.wireway.ch"))
-                .header("Authorization", format!("Bearer {}", api_key))
-                .header(header::UPGRADE, "websocket")
-                .header(header::CONNECTION, "Upgrade")
-                .header(header::SEC_WEBSOCKET_VERSION, "13")
-                .header(header::SEC_WEBSOCKET_KEY, key)
-                .body(())
-                .unwrap();
+async fn connect_and_run(api_key: &str, url: &url::Url) -> Result<(), Box<dyn std::error::Error>> {
+    let mut rng = rand::thread_rng();
+    let key: [u8; 16] = rng.gen();
+    let key = general_purpose::STANDARD.encode(&key);
 
-            match connect_async(request).await {
-                Ok((ws_stream, _)) => {
-                    log("WebSocket connection established");
-                    let (mut write, mut read) = ws_stream.split();
+    let request = Request::builder()
+        .uri(url.as_str())
+        .header("Host", url.host_str().unwrap_or("timelens.wireway.ch"))
+        .header("Authorization", format!("Bearer {}", api_key))
+        .header(header::UPGRADE, "websocket")
+        .header(header::CONNECTION, "Upgrade")
+        .header(header::SEC_WEBSOCKET_VERSION, "13")
+        .header(header::SEC_WEBSOCKET_KEY, key)
+        .body(())
+        .unwrap();
 
-                    let mut last_window_info = String::new();
+    let (ws_stream, _) = connect_async(request).await?;
+    log("WebSocket connection established");
+    let (mut write, mut read) = ws_stream.split();
 
-                    loop {
-                        tokio::select! {
-                            _ = tokio::time::sleep(Duration::from_secs(1)) => {
-                                if let Some(app_name) = get_active_window_info() {
-                                    log(&format!("{}", app_name));
+    let mut last_window_info = String::new();
 
-                                    if app_name != last_window_info {
-                                        last_window_info = app_name.clone();
+    loop {
+        tokio::select! {
+            _ = tokio::time::sleep(Duration::from_secs(1)) => {
+                if let Some(app_name) = get_active_window_info() {
+                    log(&format!("{}", app_name));
 
-                                        if let Err(e) = write.send(Message::Text(app_name)).await {
-                                            log(&format!("Error sending active window info: {:?}", e));
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    log("Failed to get active window info");
-                                }
-                            }
-                            msg = read.next() => {
-                                match msg {
-                                    Some(Ok(_)) => {},
-                                    Some(Err(e)) => {
-                                        log(&format!("Error receiving message: {:?}", e));
-                                        break;
-                                    }
-                                    None => {
-                                        log("WebSocket connection closed");
-                                        break;
-                                    }
-                                }
-                            }
+                    if app_name != last_window_info {
+                        last_window_info = app_name.clone();
+
+                        if let Err(e) = write.send(Message::Text(app_name)).await {
+                            log(&format!("Error sending active window info: {:?}", e));
+                            return Err(e.into());
                         }
                     }
+                } else {
+                    log("Failed to get active window info");
                 }
-                Err(e) => log(&format!("WebSocket connection error: {:?}", e)),
             }
-
-            log("Connection closed, attempting to reconnect...");
-            tokio::time::sleep(Duration::from_secs(5)).await;
-        } => {}
+            msg = read.next() => {
+                match msg {
+                    Some(Ok(_)) => {},
+                    Some(Err(e)) => {
+                        log(&format!("Error receiving message: {:?}", e));
+                        return Err(e.into());
+                    }
+                    None => {
+                        log("WebSocket connection closed");
+                        return Ok(());
+                    }
+                }
+            }
+        }
     }
-
-    Ok(())
 }
