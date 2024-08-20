@@ -25,7 +25,13 @@ fn get_active_window_info() -> Option<String> {
     {
         let mut ctx = AppInfoContext::new();
         ctx.refresh_apps().ok()?;
-        ctx.get_frontmost_application().ok().map(|app| app.name)
+        ctx.get_frontmost_application().ok().and_then(|app| {
+            if app.name != "loginwindow" {
+                Some(app.name)
+            } else {
+                None
+            }
+        })
     }
 
     #[cfg(not(target_os = "macos"))]
