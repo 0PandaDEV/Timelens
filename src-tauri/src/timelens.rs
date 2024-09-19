@@ -20,6 +20,18 @@ use std::path::PathBuf;
 #[cfg(target_os = "macos")]
 use applications::{AppInfoContext, AppInfo};
 
+pub fn run() -> Result<(), Box<dyn std::error::Error>> {
+    let runtime = tokio::runtime::Runtime::new()?;
+    runtime.block_on(async {
+        if let Err(e) = run_internal().await {
+            log(&format!("Error: {}", e));
+            Err(e)
+        } else {
+            Ok(())
+        }
+    })
+}
+
 fn get_active_window_info() -> Option<String> {
     #[cfg(target_os = "macos")]
     {
@@ -104,7 +116,7 @@ fn write_to_log_file(message: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn log(message: &str) {
+pub fn log(message: &str) {
     let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
     let log_message = format!("[{}] {}", timestamp, message);
     println!("{}", log_message);
@@ -113,42 +125,31 @@ fn log(message: &str) {
     }
 }
 
-fn get_or_set_api_key() -> String {
-    let user_dirs = UserDirs::new().expect("Failed to get user directories");
+fn get_or_set_api_key() -> Result<String, Box<dyn std::error::Error>> {
+    let user_dirs = UserDirs::new().ok_or("Failed to get user directories")?;
     let documents_dir = user_dirs
         .document_dir()
-        .expect("Failed to get documents directory");
+        .ok_or("Failed to get documents directory")?;
     let timelens_dir = documents_dir.join("timelens");
     let token_file = timelens_dir.join("token.txt");
 
-    fs::create_dir_all(&timelens_dir).expect("Failed to create timelens directory");
+    fs::create_dir_all(&timelens_dir)?;
 
-    if let Ok(api_key) = fs::read_to_string(&token_file) {
-        api_key.trim().to_string()
-    } else {
-        let api_key: String = Input::new()
-            .with_prompt("Please enter your TimeLens API key")
-            .interact_text()
-            .expect("Failed to get user input");
+    match fs::read_to_string(&token_file) {
+        Ok(api_key) => Ok(api_key.trim().to_string()),
+        Err(_) => {
+            let api_key: String = Input::new()
+                .with_prompt("Please enter your TimeLens API key")
+                .interact_text()?;
 
-        File::create(&token_file)
-            .and_then(|mut file| file.write_all(api_key.as_bytes()))
-            .expect("Failed to save API key");
-
-        api_key
+            fs::write(&token_file, api_key.as_bytes())?;
+            Ok(api_key)
+        }
     }
 }
 
-pub fn run() {
-    tokio::runtime::Runtime::new().unwrap().block_on(async {
-        if let Err(e) = run_internal().await {
-            log(&format!("Error: {}", e));
-        }
-    });
-}
-
 async fn run_internal() -> Result<(), Box<dyn std::error::Error>> {
-    let api_key = get_or_set_api_key();
+    let api_key = get_or_set_api_key()?;
     let url = url::Url::parse("wss://timelens.wireway.ch/v2/event")?;
 
     loop {

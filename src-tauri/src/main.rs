@@ -18,7 +18,7 @@ fn main() {
             window.hide().unwrap();
 
             std::thread::spawn(move || {
-                timelens::run();
+                let _ = timelens::run();
             });
 
             tray::setup(app)?;
