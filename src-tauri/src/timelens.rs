@@ -7,7 +7,7 @@ use directories::UserDirs;
 use futures_util::{SinkExt, StreamExt};
 use http::{header, Request};
 use rand::Rng;
-use std::fs::{self, File, OpenOptions};
+use std::fs::{self, OpenOptions};
 use std::io::Write;
 #[cfg(not(target_os = "macos"))]
 use std::path::Path;
