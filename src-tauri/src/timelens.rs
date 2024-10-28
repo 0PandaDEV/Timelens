@@ -49,7 +49,7 @@ fn get_active_window_info() -> Option<String> {
     #[cfg(not(target_os = "macos"))]
     {
         let mut system = System::new_all();
-        system.refresh_processes_specifics(ProcessesToUpdate::All, ProcessRefreshKind::new());
+        system.refresh_processes_specifics(ProcessesToUpdate::All, false, ProcessRefreshKind::new());
 
         get_active_window().ok().and_then(|window| {
             let pid = sysinfo::Pid::from_u32(window.process_id as u32);
