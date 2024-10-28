@@ -13,26 +13,26 @@
       <tr>
         <td><strong>Download for</strong></td>
         <td>
-          <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Vleer-0.1.1.msi">
+          <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Timelens-Client-0.1.1.msi">
             <img src="src-tauri/icons/windows.png" alt="Windows"> <strong>Windows</strong>
           </a>
         </td>
         <td>
-          <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Vleer-0.1.1_silicon.dmg">
+          <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Timelens-Client-0.1.1_silicon.dmg">
             <picture>
               <img src="src-tauri/icons/apple.png" alt="macOS Silicon">
             </picture> <strong>macOS (Silicon)</strong>
           </a>
         </td>
         <td>
-          <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Vleer-0.1.1_intel.dmg">
+          <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Timelens-Client-0.1.1_intel.dmg">
             <picture>
               <img src="src-tauri/icons/apple.png" alt="macOS Intel">
             </picture> <strong>macOS (Intel)</strong>
           </a>
         </td>
         <td>
-          <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Vleer-0.1.1.AppImage">
+          <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Timelens-Client-0.1.1.AppImage">
             <img src="src-tauri/icons/linux.png" alt="Linux"> <strong>Linux</strong>
           </a>
         </td>
