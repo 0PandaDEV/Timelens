@@ -3,9 +3,9 @@
 <img width="150px" src="src-tauri/icons/icon.png" />
 <h1><b>Timelens</b></h1>
 
-<p align="center">
-  <i>The elegant open source native Rust client for <a href="https://timelens.wierway.ch">timelens.wierway.ch</a></i>
-</p>
+The elegant open source native Rust client for Timelens
+<br>
+<a href="https://timelens.wierway.ch">timelens.wierway.ch »</a>
 
 <div align="center">
   <table style="border-collapse: collapse;">
@@ -14,26 +14,26 @@
         <td><strong>Download for</strong></td>
         <td>
           <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Timelens-Client-0.1.1.msi">
-            <img src="src-tauri/icons/windows.png" alt="Windows"> <strong>Windows</strong>
+            <img src="src-tauri/icons/windows.png" alt="Windows"> Windows
           </a>
         </td>
         <td>
           <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Timelens-Client-0.1.1_silicon.dmg">
             <picture>
               <img src="src-tauri/icons/apple.png" alt="macOS Silicon">
-            </picture> <strong>macOS (Silicon)</strong>
+            </picture> macOS (Silicon)
           </a>
         </td>
         <td>
           <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Timelens-Client-0.1.1_intel.dmg">
             <picture>
               <img src="src-tauri/icons/apple.png" alt="macOS Intel">
-            </picture> <strong>macOS (Intel)</strong>
+            </picture> macOS (Intel)
           </a>
         </td>
         <td>
           <a href="https://github.com/0pandadev/timelens/releases/download/v0.1.1/Timelens-Client-0.1.1.AppImage">
-            <img src="src-tauri/icons/linux.png" alt="Linux"> <strong>Linux</strong>
+            <img src="src-tauri/icons/linux.png" alt="Linux"> Linux
           </a>
         </td>
       </tr>
@@ -65,6 +65,8 @@ While Timelens primarily lives in your system tray for seamless time tracking, h
 ![CleanShot 2024-10-28 at 10  27 30](https://github.com/user-attachments/assets/27295cc4-6ccc-462d-a8f2-873f85fc876b)
 
 ## 🚀 Setup
+
+Place your API token from timelens in the according file.
 
 <table>
   <thead>
