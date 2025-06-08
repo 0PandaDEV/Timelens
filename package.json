@@ -11,10 +11,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@tauri-apps/api": "2.0.3",
-    "@tauri-apps/cli": "2.0.4",
-    "@tauri-apps/plugin-fs": "2.0.1",
-    "nuxt": "3.16.0",
-    "vue": "3.5.12"
+    "@tauri-apps/api": "2.5.0",
+    "@tauri-apps/cli": "2.5.0",
+    "@tauri-apps/plugin-fs": "2.3.0",
+    "nuxt": "3.17.5",
+    "vue": "3.5.16"
   }
 }
